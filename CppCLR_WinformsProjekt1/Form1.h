@@ -23,13 +23,165 @@ namespace CppCLR_WinformsProjekt {
 	using namespace System::IO;
 	using namespace System::Xml;
 	using namespace std;
-	
+
+	vector <string> lines1;
+	vector <string> lines2;
+	vector <string > tags;
+	vector <string > tagsAndLines;
+	vector<string > pureTags;
+	vector<int> mistakes;
+	vector<string> tagsMC;
+	vector<int> mistakeCase;
 	vector <string> lines;
 	vector <string> T;
 	vector <string> t_l;
 	vector<string> ptw;
 	vector<string> pt;
 
+	//===========correct==============
+	int classify_word(string word) {//1:opening 2:closing 3:value  4:lone tag  5:comment  6:prolog
+		if (word.empty()) { return 0; }
+		if ((word[0] == '<') && word[word.length() - 1] == '>')
+		{
+			if (word[1] == '/') { return 2; }
+			if (word[word.length() - 2] == '/') { return 4; }
+			if (word[1] == '?') { return 6; }
+			if (word[1] == '!') { return 5; }
+			return 1;
+		}
+		return 3;
+	}
+	void findMistakesLines() {
+		mistakes.clear();
+		tagsMC.clear();
+		mistakeCase.clear();
+		//////////separate tagName from < , > ///////////////////
+		for (unsigned int x = 0; x<lines2.size(); x++) {
+
+			if (lines2[x].empty()) {
+				tagsMC.push_back(lines2[x]);
+				continue;
+			}
+			if (classify_word(lines2[x]) == 4 || classify_word(lines2[x]) == 5 || classify_word(lines2[x]) == 6) { continue; }
+
+			int tagCounter = std::count(lines2[x].begin(), lines2[x].end(), '<');
+			int place1 = lines2[x].find('<');
+			int place2 = lines2[x].find('>');
+
+			if (tagCounter == 0) {
+				tagsMC.push_back("~" + lines2[x]);
+				continue;
+			}
+
+			for (int m = 0; m<tagCounter; m++) {
+				if (m == 0) {
+					std::string s = lines2[x].substr(place1 + 1, place2 - place1 - 1);
+					s = s.substr(0, s.find(' '));
+					tagsMC.push_back(s);
+				}
+				else {
+					std::string s = lines2[x].substr(place1 + 1, place2 - place1 - 1);
+					s = s.substr(0, s.find(' '));
+					tagsMC.back() = tagsMC.back() + "-" + s;
+				}
+
+				int place3 = lines2[x].find('<', place1 + 1);
+				int place4 = lines2[x].find('>', place2 + 1);
+				place1 = place3;
+				place2 = place4;
+			}
+		}
+		/////////////////////declare mistakes lines /////////////////////////////
+
+		std::vector<std::string> xx;
+		std::vector<int> index;
+
+		for (unsigned int x = 1; x<tagsMC.size() + 1; x++) {
+
+			if (tagsMC[x - 1].empty()) {
+				mistakes.push_back(x);
+				continue;
+			}
+			else if (tagsMC[x - 1][0] == '~') {
+				continue;
+			}
+
+			if (tagsMC[x - 1].find('/') == std::string::npos) {
+				xx.push_back(tagsMC[x - 1]);
+				index.push_back(x);
+			}
+			else {
+				std::stringstream check1(tagsMC[x - 1]);
+
+				std::string intermediate;
+
+				while (getline(check1, intermediate, '-'))
+				{
+					if (intermediate.find('/') == std::string::npos) {
+						xx.push_back(intermediate);
+						index.push_back(x);
+					}
+					else {
+						std::string s = intermediate.substr(1, intermediate.length() - 1);
+						if (xx.back() == s) {
+							xx.pop_back();
+							index.pop_back();
+						}
+						else if (xx[xx.size() - 2] == s) {
+							mistakes.push_back(index.back());
+							mistakeCase.push_back(1);
+							xx.pop_back();
+							index.pop_back();
+							x--;
+						}
+						else {
+							mistakes.push_back(x);
+							mistakeCase.push_back(2);
+							xx.pop_back();
+							index.pop_back();
+						}
+					}
+				}
+			}
+		}
+		sort(mistakes.begin(), mistakes.end());
+		return;
+	}
+	void correctMistakes() {
+		if (mistakeCase.size() > 0) {
+			for (unsigned int x = 0; x<mistakes.size(); x++) {
+
+				if (mistakeCase[x] == 2) {
+					string s;
+					stringstream check1(lines2[mistakes[x] - 1]);
+					getline(check1, lines2[mistakes[x] - 1], '/');
+					string temp = lines2[mistakes[x] - 1].substr(0, lines2[mistakes[x] - 1].length() - 1);
+					stringstream check2(temp);
+					getline(check2, s, '>');
+					lines2[mistakes[x] - 1] = temp + "</" + s.substr(1, s.find_first_of(' ')) + ">";
+
+				}if (mistakeCase[x] == 1 && lines2[mistakes[x] - 1][lines2[mistakes[x] - 1].length() - 1] != '>') {
+					string s;
+					stringstream check1(lines2[mistakes[x] - 1]);
+					getline(check1, s, '>');
+					lines2[mistakes[x] - 1] = lines2[mistakes[x] - 1] + "</" + s.substr(1, s.find_first_of(' ')) + ">";
+				}
+				else if (mistakeCase[x] == 1) {
+					string s;
+					stringstream check1(lines2[mistakes[x] - 1]);
+					getline(check1, s, '>');
+					for (unsigned int y = 0; y<lines2.size(); y++) {
+						if (lines2[y].empty()) {
+							lines2[y] = "</" + s.substr(1, s.find_first_of(' ')) + ">";
+						}
+					}
+				}
+
+			}
+		}
+		return;
+	}
+	//==================================
 	void getpt() {
 		pt.resize(0);
 		for (int x = 0; x < T.size(); x++) {
@@ -372,7 +524,87 @@ namespace CppCLR_WinformsProjekt {
 	}
 	private: System::Void button2_Click(System::Object^  sender, System::EventArgs^  e) {
 		
+		string line;
+		filepath = openfileDialog1->FileName;
+		x = gcnew StreamReader(filepath);
+		String^ line1;
+		while ((line1 = x->ReadLine()) != nullptr)
+		{
+			std::string line = msclr::interop::marshal_as< std::string >(line1);
+			lines1.push_back(line);
+		}
 
+		for (int x = 0; x < lines1.size(); x++) {
+
+			int tagCounter = std::count(lines1[x].begin(), lines1[x].end(), '<');
+			int place1 = lines1[x].find('<');
+			int place2 = lines1[x].find('>');
+			char start = lines1[x][place1 + 1];
+			if (!((start >= 'a' && start <= 'z') || (start >= 'A' && start <= 'Z') || (start == '/'))) {
+				continue;
+			}
+			for (int m = 0; m < tagCounter; m++) {
+				tags.push_back(lines1[x].substr(place1 + 1, place2 - place1 - 1));
+				tagsAndLines.push_back(lines1[x].substr(place1 + 1, place2 - place1 - 1));
+
+				if (lines1[x][place2 + 1] != '<') {
+					int temp = lines1[x].find('<', place1 + 1);
+					tagsAndLines.push_back(lines1[x].substr(place2 + 1, temp - place2 - 1));
+				}
+
+				int place3 = lines1[x].find('<', place1 + 1);
+				int place4 = lines1[x].find('>', place2 + 1);
+				place1 = place3;
+				place2 = place4;
+			}
+		}
+
+		for (int x = 0; x<tags.size(); x++) {
+			if (!tags[x].empty()) {
+				if (tags[x].find(' ') != string::npos) {
+					string s = tags[x].substr(0, tags[x].find(' '));
+					pureTags.push_back(s);
+				}
+				else {
+					pureTags.push_back(tags[x]);
+				}
+			}
+		}
+
+		stack<string> tagChecker;
+		for (int x = 0; x < pureTags.size(); x++) {
+			if (pureTags[x].find('/') == string::npos) {
+				tagChecker.push(pureTags[x]);
+			}
+			else {
+				string temp = tagChecker.top();
+				string s = pureTags[x].substr(1, pureTags[x].length() - 1);
+
+				if (s == tagChecker.top()) {
+					tagChecker.pop();
+					continue;
+				}
+				else {
+					tagChecker.push(temp);
+					tagChecker.push(s);
+				}
+			}
+		}
+		if (tagChecker.size() == 0) {
+			textBox1->Visible = true;
+			textBox1->Text = "Correct XML";
+			groupBox3->Visible = true;
+			richTextBox2->Visible = true;
+		}//return true; }
+		else {
+			textBox1->Visible = true;
+			textBox1->Text = "Wrong XML";
+			findMistakesLines();
+			groupBox3->Visible = true;
+			richTextBox2->Visible = true;
+			button3->Visible = true;
+
+		}
 
 
 
@@ -380,7 +612,29 @@ namespace CppCLR_WinformsProjekt {
 private: System::Void textBox1_TextChanged(System::Object^  sender, System::EventArgs^  e) {
 }
 private: System::Void button3_Click(System::Object^  sender, System::EventArgs^  e) {
-	
+	//===========readfile line by line==========
+	string line;
+	filepath = openfileDialog1->FileName;
+	x = gcnew StreamReader(filepath);
+	String^ line1;
+	while ((line1 = x->ReadLine()) != nullptr)
+	{
+
+		std::string line = msclr::interop::marshal_as< std::string >(line1);
+		lines2.push_back(line);
+	}
+
+	//findMistakesLines();
+	correctMistakes();
+	string correction;
+	String^ correction2;
+	int j = 0;
+	for (int i = 1; i<lines2.size() + 1; i++)
+	{
+		correction = correction + lines2[i - 1] + "\n";
+	}
+	correction2 = gcnew String(correction.c_str());
+	richTextBox2->Text = correction2;
 		
 }
 private: System::Void button4_Click(System::Object^  sender, System::EventArgs^  e) {
