@@ -24,6 +24,39 @@ namespace CppCLR_WinformsProjekt {
 	using namespace System::Xml;
 	using namespace std;
 
+	class Stack
+	{
+		char array[1000];
+		int s;
+	public:
+		Stack()
+		{
+			s = 0;
+		}
+		char top()
+		{
+			if (s>0)
+			{
+				return array[s - 1];
+			}
+		}
+		void push(char r)
+		{
+			if (s<1000)
+			{
+				array[s] = r;
+				s++;
+			}
+		}
+		void pop()
+		{
+			if (s > 0)
+			{
+				s--;
+			}
+		}
+	};
+
 	vector <string> lines1;
 	vector <string> lines2;
 	vector <string > tags;
@@ -37,6 +70,7 @@ namespace CppCLR_WinformsProjekt {
 	vector <string> t_l;
 	vector<string> ptw;
 	vector<string> pt;
+	extern string convjson = "{";
 
 	//===========correct==============
 	int classify_word(string word) {//1:opening 2:closing 3:value  4:lone tag  5:comment  6:prolog
@@ -241,7 +275,297 @@ namespace CppCLR_WinformsProjekt {
 			}
 		}
 	}
+	struct Node {
+		string data, internalData;
+		Node* parent;
+		std::vector<Node *> children;
+	};
 
+	Node* newnode(string data) {  //makeNewNode
+		string mainTag, internalData;
+		if (data.find('=') == -1) {
+			Node* newNode = new Node;
+			newNode->data = data;
+			return newNode;
+		}
+		else {
+			int index = data.find(' ');
+			mainTag = data.substr(0, index);
+			internalData = data.substr(index + 1, data.length() - 1);
+			Node* newNode = new Node;
+			newNode->data = mainTag;
+			newNode->internalData = internalData;
+			return newNode;
+		}
+	}
+
+	Node* newchildren(Node* root, std::string data) {   //addChildren
+		Node* child = newnode(data);
+		root->children.push_back(child);
+		child->parent = root;
+		return child;
+	}
+
+	Node* printparent(Node* root) {        //getParent
+
+		Node* temp = root;
+		if (temp->parent != NULL) {
+			root = temp->parent;
+		}
+		return root;
+	}
+
+
+	Node* GP(Node* root) {      //getMainParent
+
+		Node* temp = root;
+		while (1) {
+			if (temp->parent == NULL) {
+				break;
+			}
+			else {
+				temp = temp->parent;
+			}
+		}
+		return temp;
+	}
+
+	void newchildren(Node* root, Node* child) {   //addChildren
+		root->children.push_back(child);
+		return;
+	}
+
+	void printchildren(Node* root) {      //showChildren
+		int size = root->children.size();
+		for (int x = 0; x<size; x++) {
+			cout << root->children[x]->data << "\t";
+		}
+		cout << "\n";
+	}
+
+	Node* GC(Node* root) {     //getLastChild
+
+		if (root->children.size() == 0) {
+			return root;
+		}
+		else return GC(root->children[root->children.size() - 1]);
+
+	}
+	Node* buildtree(std::vector<std::string> ptw, Node* current_root) {     //makeTree
+		std::stack<std::string> temp;
+		for (unsigned int x = 0; x<ptw.size(); x++) {
+			if (x == 0) {
+				current_root = newnode(ptw[x]);
+				current_root->parent = NULL;
+				std::stringstream check1(ptw[x]);
+				std::string s;
+				getline(check1, s, ' ');
+				temp.push(s);
+				continue;
+			}
+
+			if (ptw[x][0] != '~') {
+				std::stringstream check1(ptw[x]);
+				std::string s;
+				getline(check1, s, ' ');
+				if (s == temp.top()) {
+					temp.pop();
+					current_root = printparent(current_root);
+				}
+				else {
+					current_root = newchildren(current_root, ptw[x]);
+					temp.push(s);
+				}
+			}
+			else {
+				current_root = newchildren(current_root, ptw[x].substr(1, ptw[x].length() - 1));
+				current_root = printparent(current_root);
+			}
+		}
+		return GP(current_root);
+	}
+
+
+	void repeatdata(Node* root) {    //makeOneNodeForRepeatedChild
+		if (root->children.size() < 1) {
+			return;
+		}
+		std::vector<std::string>temp;
+		std::vector<std::string>names;
+		for (int x = 0; x<root->children.size(); x++) {
+			if (root->children[x]->data != "*") {
+				temp.push_back(root->children[x]->data);
+			}
+		}
+		for (unsigned int x = 0; x<temp.size(); x++) {
+			if (count(temp.begin(), temp.end(), temp[x]) > 1 && count(names.begin(), names.end(), temp[x]) == 0) {
+				names.push_back(temp[x]);
+			}
+		}
+		for (unsigned int x = 0; x<names.size(); x++) {
+			Node* simp = newnode(names[x]);
+			for (int y = 0; y<root->children.size(); y++) {
+				if (root->children[y]->data == names[x]) {
+					root->children[y]->data = '*';
+					root->children[y]->parent = simp;
+					newchildren(simp, root->children[y]);
+					root->children.erase(root->children.begin() + y);
+					y--;
+				}
+
+			}
+			newchildren(root, simp);
+			simp->parent = root;
+		}
+		return;
+	}
+	void rebuild(Node* root) {        //organizeTree
+		if (root == NULL) { return; }
+		repeatdata(root);
+		for (int x = 0; x<root->children.size(); x++) {
+			rebuild(root->children[x]);
+		}
+		return;
+	}
+
+
+	void design1(Node* root) {      //makeQutation
+
+		for (unsigned int x = 0; x<root->children.size(); x++) {
+			if (root->children[x]->data != "*") {
+				root->children[x]->data = "\"" + root->children[x]->data + "\"";
+			}
+			design1(root->children[x]);
+		}
+	}
+
+	void design2(Node* root) {       //makeBrackets
+
+		for (int x = 0; x<root->children.size(); x++) {
+			bool case2 = (root->children.size() >= 1) && (root->children[0]->data != "*") && (root->children[x]->children.size() != 0) && (x == root->children.size() - 1);
+			bool case3 = (root->children.size() > 1) && (root->children[0]->data == "*") && (x == root->children.size() - 1);
+			if (case2) {
+				Node* temp = GC(root);
+				if (temp->data[temp->data.length() - 1] == ']' || (temp->data[temp->data.length() - 1] == '}')) {
+					int s1 = count(temp->data.begin(), temp->data.end(), ']');
+					int s2 = count(temp->data.begin(), temp->data.end(), '}');
+					if (s1<0) { s1 = 0; }
+					if (s2<0) { s2 = 0; }
+					int sum = s1 + s2;
+					temp->data.insert(temp->data.length() - sum, "}");
+				}
+				else {
+					temp->data = temp->data + "}";
+				}
+			}
+			else if (case3) {
+				Node* temp = GC(root->children[x]);
+				if (temp->data[temp->data.length() - 1] == ']' || (temp->data[temp->data.length() - 1] == '}')) {
+					int s1 = count(temp->data.begin(), temp->data.end(), ']');
+					int s2 = count(temp->data.begin(), temp->data.end(), '}');
+					if (s1<0) { s1 = 0; }
+					if (s2<0) { s2 = 0; }
+					int sum = s1 + s2;
+					temp->data.insert(temp->data.length() - sum, "]");
+				}
+				else {
+					temp->data = temp->data + "]";
+				}
+			}
+
+			design2(root->children[x]);
+		}
+	}
+
+	void design3(Node* root) {            //regulateHyberTags
+		if (!root->internalData.empty()) {
+			for (unsigned int x = 0; x<root->internalData.length(); x++) {
+				if (x == 0) {
+					root->internalData = "{\"" + root->internalData;
+				}
+				if (root->internalData[x] == ' ' && root->internalData[x - 1] == '"') {
+					root->internalData[x] = ',';
+				}
+				else if (root->internalData[x] == '=') {
+					root->internalData[x] = ':';
+				}
+				if (root->internalData[x] == ',') {
+					root->internalData.insert(x + 1, "\"");
+				}
+				else if (root->internalData[x] == ':') {
+					root->internalData.insert(x, "\"");
+					x++;
+				}
+			}
+			root->internalData += ",";
+		}
+	}
+
+	void design4(Node* root) {     //passRoot
+		design3(root);
+		for (int x = 0; x<root->children.size(); x++) {
+			design4(root->children[x]);
+		}
+	}
+
+	void printnode(Node* root) {                 //printNode
+
+		if (root->data == "\*" && root->children.size() == 1 && root->children[0]->children.size() == 0 && root->internalData.empty()) {
+			return;
+		}if (root->data == "\*" && root->children.size() == 1 && root->children[0]->children.size() == 0 && !root->internalData.empty()) {
+			convjson += root->internalData;
+		}
+		else if (root->data == "\*" && root->children.size() >= 1 && root->internalData.empty()) {
+			convjson += "{";
+		}
+		else if (root->data == "\*" && root->children.size() >= 1 && !root->internalData.empty()) {
+			convjson += root->internalData;
+		}
+		else if (root->children.size() == 0 && (root->data[root->data.length() - 1] == '}' || root->data[root->data.length() - 1] == ']')) {
+			if (!root->parent->internalData.empty()) {
+				convjson += "\"text\"\:" + root->data + ",";
+			}
+			else { convjson += root->data + ","; }
+		}
+		else if (root->children.size() == 0) {
+			if (root->parent->children.size() == 1 && root->parent->internalData.empty()) {
+				convjson += root->data + ",";
+			}
+			else { convjson += root->data + "},"; }
+		}
+		else if (root->children.size() == 1 && root->children[0]->children.size() != 0 && root->data != "\*" && root->internalData.empty() && root->parent != NULL) {
+			convjson += root->data + "\:{";
+		}
+		else if (root->children.size() == 1 && root->children[0]->children.size() != 0 && root->data != "\*" && !root->internalData.empty() && root->parent != NULL) {
+			convjson += root->data + "\:" + root->internalData;
+		}
+		else if (root->children.size() == 1 && root->data != "\*" && root->parent != NULL && root->internalData.empty()) {
+			convjson += root->data + ":";
+		}
+		else if (root->children.size() == 1 && root->data != "\*" && root->parent != NULL && !root->internalData.empty()) {
+			convjson += root->data + "\:" + root->internalData;
+		}
+		else if (root->children.size() >0 && root->children[0]->data == "\*") {
+			convjson += root->data + "\:[";
+		}
+		else if (root->children.size() > 0 && root->children[0]->data != "\*" && root->internalData.empty()) {
+			convjson += root->data + "\:";
+		}
+		else if (root->children.size() > 0 && root->children[0]->data != "\*" && !root->internalData.empty()) {
+			convjson += root->data + "\:" + root->internalData;
+		}
+	}
+	void print(Node* root) {
+		printnode(root);
+		for (unsigned int x = 0; x<root->children.size(); x++) { print(root->children[x]); }
+	}
+	void jsonform(Node* root) {               //makeJson
+		root->data = "\"" + root->data + "\"";
+		design1(root);
+		design2(root);
+		print(root);
+		convjson[convjson.length() - 1] = '}';
+	}
 
 	/// <summary>
 	/// Zusammenfassung für Form1
@@ -639,6 +963,117 @@ private: System::Void button3_Click(System::Object^  sender, System::EventArgs^ 
 }
 private: System::Void button4_Click(System::Object^  sender, System::EventArgs^  e) {
 	
+	string line;
+	filepath = openfileDialog1->FileName;
+	x = gcnew StreamReader(filepath);
+	String^ line1;
+	while ((line1 = x->ReadLine()) != nullptr)
+	{
+		std::string line = msclr::interop::marshal_as< std::string >(line1);
+		lines.push_back(line);
+	}
+
+	getdata();
+	getpt();
+	getptw();
+	Node* current_root = NULL;
+	current_root = buildtree(ptw, current_root);
+	rebuild(current_root);
+	design4(current_root);
+	jsonform(current_root);
+	Stack c;
+	Stack n;
+	bool cl = false;
+	string convjson2;
+	int spc = 0;
+	int k = 0;
+
+	for (int i = 0; i < convjson.size(); i++)
+	{
+		if (convjson[i] == '{')
+		{
+			c.push(convjson[i]);
+			convjson2 = convjson2 + convjson[i] + "\n";
+			spc++;
+			for (int j = 0; j < spc; j++)
+			{
+				convjson2 = convjson2;
+			}
+		}
+		else if (convjson[i] == '[')
+		{
+			cl = false;
+			convjson2 = convjson2 + convjson[i] + "\n";
+			spc++;
+			for (int j = 0; j < spc; j++)
+			{
+				convjson2 = convjson2;
+			}
+			n.push(spc);
+			k++;
+		}
+		else if (convjson[i] == ']')
+		{
+			cl = true;
+			convjson2 = convjson2 + "\n";
+			for (int j = 0; j < n.top() - k; j++)
+			{
+				convjson2 = convjson2;
+			}
+			convjson2 = convjson2 + convjson[i];
+			k++;
+		}
+		else if (convjson[i] == ':')
+		{
+			convjson2 = convjson2 + convjson[i];
+			convjson2 = convjson2;
+		}
+		else if (convjson[i] == ',')
+		{
+			convjson2 = convjson2 + convjson[i];
+			convjson2 = convjson2 + "\n";
+			for (int j = 0; j < spc; j++)
+			{
+				convjson2 = convjson2;
+			}
+		}
+		else if (convjson[i] == '}')
+		{
+			if (c.top() == '{')
+			{
+				if ((cl == true))
+				{
+					spc--;
+					c.pop();
+					convjson2 = convjson2 + "\n";
+					for (int j = 0; j < n.top() - k; j++)
+					{
+						convjson2 = convjson2;
+					}
+					k++;
+					convjson2 = convjson2 + convjson[i];
+				}
+				else
+				{
+					spc--;
+					c.pop();
+					convjson2 = convjson2 + "\n";
+					for (int j = 0; j < n.top(); j++)
+					{
+						convjson2 = convjson2;
+					}
+					convjson2 = convjson2 + convjson[i];
+				}
+			}
+		}
+		else
+		{
+			convjson2 = convjson2 + convjson[i];
+		}
+	}
+	convjson2 = convjson2 + "\n" + "}";
+	String^ convjson3 = gcnew String(convjson2.c_str());
+	richTextBox2->Text = convjson3;
 
 }
 private: System::Void button5_Click(System::Object^  sender, System::EventArgs^  e) {
