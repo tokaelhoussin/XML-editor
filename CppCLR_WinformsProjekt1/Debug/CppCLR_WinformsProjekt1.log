@@ -1,0 +1,37 @@
+﻿  CppCLR_WinformsProjekt.cpp
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(220): warning C4018: '<': signed/unsigned mismatch
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(237): warning C4018: '<': signed/unsigned mismatch
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(258): warning C4018: '<': signed/unsigned mismatch
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(265): warning C4018: '<': signed/unsigned mismatch
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(394): warning C4018: '<': signed/unsigned mismatch
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(406): warning C4018: '<': signed/unsigned mismatch
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(424): warning C4018: '<': signed/unsigned mismatch
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(443): warning C4018: '<': signed/unsigned mismatch
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(505): warning C4018: '<': signed/unsigned mismatch
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(512): warning C4129: '*': unrecognized character escape sequence
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(514): warning C4129: '*': unrecognized character escape sequence
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(517): warning C4129: '*': unrecognized character escape sequence
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(520): warning C4129: '*': unrecognized character escape sequence
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(525): warning C4129: ':': unrecognized character escape sequence
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(535): warning C4129: '*': unrecognized character escape sequence
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(536): warning C4129: ':': unrecognized character escape sequence
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(538): warning C4129: '*': unrecognized character escape sequence
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(539): warning C4129: ':': unrecognized character escape sequence
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(541): warning C4129: '*': unrecognized character escape sequence
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(544): warning C4129: '*': unrecognized character escape sequence
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(545): warning C4129: ':': unrecognized character escape sequence
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(547): warning C4129: '*': unrecognized character escape sequence
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(548): warning C4129: ':': unrecognized character escape sequence
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(550): warning C4129: '*': unrecognized character escape sequence
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(551): warning C4129: ':': unrecognized character escape sequence
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(553): warning C4129: '*': unrecognized character escape sequence
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(554): warning C4129: ':': unrecognized character escape sequence
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(858): warning C4018: '<': signed/unsigned mismatch
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(883): warning C4018: '<': signed/unsigned mismatch
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(896): warning C4018: '<': signed/unsigned mismatch
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(953): warning C4018: '<': signed/unsigned mismatch
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\Form1.h(987): warning C4018: '<': signed/unsigned mismatch
+c:\users\as\documents\visual studio 2015\projects\cppclr_winformsprojekt1\cppclr_winformsprojekt1\form1.h(40): warning C4715: 'CppCLR_WinformsProjekt::Stack::top': not all control paths return a value
+  AssemblyInfo.obj : /DEBUG:FASTLINK is not supported when managed code is present; restarting link with /DEBUG:FULL
+  CppCLR_WinformsProjekt1.vcxproj -> C:\Users\as\Documents\Visual Studio 2015\Projects\CppCLR_WinformsProjekt1\Debug\CppCLR_WinformsProjekt1.exe
+  CppCLR_WinformsProjekt1.vcxproj -> C:\Users\as\Documents\Visual Studio 2015\Projects\CppCLR_WinformsProjekt1\Debug\CppCLR_WinformsProjekt1.pdb (Partial PDB)
